@@ -18,8 +18,12 @@ def getUserRiotID(name, nametag):
 
     if response.status_code == 200:
         return response.json()['puuid']
+    elif response.status_code == 401:
+        return 401
+    if response.status_code == 404:
+        return 404
     else:
-        print(f"Error {response.status_code}: {response.text}")
+        print(f"r {response.status_code}: {response.text}")
         return None
     
 def getMatchHistory(puuid, index):
@@ -148,8 +152,14 @@ def setup(bot):
         try:
             # Get User Riot ID
             puuid = getUserRiotID(name, nametag)
-            if not puuid:
+            if puuid == 401:
+                await ctx.send("Unauthorized Key. Call the dev to update it.")
+                return
+            elif puuid == 404:
                 await ctx.send("Error to find Riot ID.\n Please check the name and name tag(Without #).")
+                return
+            elif not puuid:
+                await ctx.send("Some error occurred while getting the Riot ID. Please try again later.")
                 return
             
             # Get Match History
